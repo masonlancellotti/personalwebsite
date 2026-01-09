@@ -1,10 +1,12 @@
 FROM python:3.12-slim
 
 WORKDIR /app
+ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python","main.py","paper","--strategy","market_maker_basic","--universe","ALL"]
+# Uses ECS PORT if set, else 5000
+CMD ["sh", "-c", "gunicorn -b 0.0.0.0:${PORT:-5000} app:app"]

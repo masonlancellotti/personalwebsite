@@ -25,6 +25,8 @@ from agent_baselines import get_baseline, get_baseline_start_datetime
 env_path = Path(__file__).parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
+DEBUG_LOG_PATH = os.getenv("DEBUG_LOG_PATH", "debug.log")
+
 app = Flask(__name__)
 CORS(app)
 
@@ -270,7 +272,7 @@ def get_alpaca_orders(limit=100, project=1):
                     buy_order_details.append({'symbol': order.symbol, 'side': side, 'qty': float(order.filled_qty) if order.filled_qty else 0})
                     # #endregion
         # #region agent log
-        with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+        with open(DEBUG_LOG_PATH, 'a') as f:
             f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'A', 'location': 'app.py:287', 'message': 'Project 1 buy orders counted', 'data': {'buy_orders_count': buy_orders_count, 'total_orders': len(orders), 'buy_order_details': buy_order_details}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
         # #endregion
         
@@ -364,7 +366,7 @@ def get_alpaca_orders(limit=100, project=1):
         trades.sort(key=lambda x: x.get('exit_time') or x.get('entry_time', ''), reverse=True)
         print(f"Converted to {len(trades)} trades ({len([t for t in trades if t['status'] == 'open'])} open, {len([t for t in trades if t['status'] == 'closed'])} closed), {buy_orders_count} buy orders")
         # #region agent log
-        with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+        with open(DEBUG_LOG_PATH, 'a') as f:
             f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'A', 'location': 'app.py:388', 'message': 'Project 1 final buy_orders_count', 'data': {'buy_orders_count': buy_orders_count, 'total_trades': len(trades), 'open_trades': len([t for t in trades if t['status'] == 'open']), 'closed_trades': len([t for t in trades if t['status'] == 'closed'])}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
         # #endregion
         return trades, buy_orders_count
@@ -517,7 +519,7 @@ def get_alpaca_orders_2(limit=100):
             if side == 'buy' or side == 'buy_order':
                 buy_orders_count += 1
                 # #region agent log
-                with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+                with open(DEBUG_LOG_PATH, 'a') as f:
                     f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'B', 'location': 'app.py:536', 'message': 'Project 2 buy order counted', 'data': {'symbol': order.symbol, 'side': side, 'qty': filled_qty, 'buy_orders_count': buy_orders_count}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
                 # #endregion
             
@@ -563,7 +565,7 @@ def get_alpaca_orders_2(limit=100):
         trades.sort(key=get_sort_time, reverse=True)
         print(f"Project 2: Showing {len(trades)} individual orders, {buy_orders_count} buy orders")
         # #region agent log
-        with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+        with open(DEBUG_LOG_PATH, 'a') as f:
             f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'A', 'location': 'app.py:578', 'message': 'Project 2 final buy_orders_count', 'data': {'buy_orders_count': buy_orders_count, 'total_trades': len(trades), 'buy_trades': len([t for t in trades if t.get('side', '').lower() == 'buy']), 'sell_trades': len([t for t in trades if t.get('side', '').lower() == 'sell'])}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
         # #endregion
         return trades, buy_orders_count
@@ -2031,13 +2033,13 @@ def calculate_stats(trades, project=1, portfolio_value=None, buy_orders_count=No
     # Count total trades: use buy_orders_count if provided, otherwise count buy trades
     # For crypto, closed trades have side='sell', so we need to count differently
     # #region agent log
-    with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+    with open(DEBUG_LOG_PATH, 'a') as f:
         f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'E', 'location': 'app.py:2725', 'message': 'calculate_stats entry', 'data': {'project': project, 'buy_orders_count': buy_orders_count, 'total_trades_input': len(trades), 'closed_trades': len([t for t in trades if t.get('status') == 'closed']), 'open_trades': len([t for t in trades if t.get('status') == 'open'])}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
     # #endregion
     if buy_orders_count is not None:
         calculated_count = buy_orders_count
         # #region agent log
-        with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+        with open(DEBUG_LOG_PATH, 'a') as f:
             f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'E', 'location': 'app.py:2726', 'message': 'Using buy_orders_count path', 'data': {'project': project, 'buy_orders_count': buy_orders_count, 'calculated_count': calculated_count}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
         # #endregion
     elif project == 2:
@@ -2049,7 +2051,7 @@ def calculate_stats(trades, project=1, portfolio_value=None, buy_orders_count=No
         closed_buys = len(closed_trades)
         calculated_count = open_buys + closed_buys
         # #region agent log
-        with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+        with open(DEBUG_LOG_PATH, 'a') as f:
             f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'E', 'location': 'app.py:2734', 'message': 'Project 2 fallback counting', 'data': {'project': project, 'open_buys': open_buys, 'closed_buys': closed_buys, 'calculated_count': calculated_count}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
         # #endregion
     else:
@@ -2057,7 +2059,7 @@ def calculate_stats(trades, project=1, portfolio_value=None, buy_orders_count=No
         filled_buys = [t for t in trades if t.get('side', '').lower() in ['buy', 'long']]
         calculated_count = len(filled_buys)
         # #region agent log
-        with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+        with open(DEBUG_LOG_PATH, 'a') as f:
             f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'E', 'location': 'app.py:2751', 'message': 'Project 1 fallback counting', 'data': {'project': project, 'filled_buys_count': len(filled_buys), 'calculated_count': calculated_count}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
         # #endregion
     
@@ -2065,7 +2067,7 @@ def calculate_stats(trades, project=1, portfolio_value=None, buy_orders_count=No
     # Otherwise, only increase (monotonicity) to handle cases where API might return partial data
     old_max = _max_trade_counts[project]
     # #region agent log
-    with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+    with open(DEBUG_LOG_PATH, 'a') as f:
         f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'C', 'location': 'app.py:2793', 'message': 'Max trade count check', 'data': {'project': project, 'calculated_count': calculated_count, 'old_max': old_max, 'buy_orders_count_provided': buy_orders_count is not None}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
     # #endregion
     
@@ -2077,7 +2079,7 @@ def calculate_stats(trades, project=1, portfolio_value=None, buy_orders_count=No
             print(f"Updated max trade count for project {project}: {old_max} -> {calculated_count} (using authoritative buy_orders_count)")
             save_max_trade_counts(_max_trade_counts)
             # #region agent log
-            with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+            with open(DEBUG_LOG_PATH, 'a') as f:
                 f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'C', 'location': 'app.py:2801', 'message': 'Max trade count updated (authoritative buy_orders_count)', 'data': {'project': project, 'old_max': old_max, 'new_max': calculated_count}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
             # #endregion
     elif calculated_count > _max_trade_counts[project]:
@@ -2086,7 +2088,7 @@ def calculate_stats(trades, project=1, portfolio_value=None, buy_orders_count=No
         print(f"Updated max trade count for project {project}: {old_max} -> {calculated_count}")
         save_max_trade_counts(_max_trade_counts)
         # #region agent log
-        with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+        with open(DEBUG_LOG_PATH, 'a') as f:
             f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'C', 'location': 'app.py:2809', 'message': 'Max trade count updated (fallback counting)', 'data': {'project': project, 'old_max': old_max, 'new_max': calculated_count}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
         # #endregion
     elif calculated_count < _max_trade_counts[project]:
@@ -2094,14 +2096,14 @@ def calculate_stats(trades, project=1, portfolio_value=None, buy_orders_count=No
         # This handles cases where API might return partial data
         print(f"WARNING: Calculated trade count ({calculated_count}) is less than max ({_max_trade_counts[project]}) for project {project}. Using max to maintain monotonicity.")
         # #region agent log
-        with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+        with open(DEBUG_LOG_PATH, 'a') as f:
             f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'C', 'location': 'app.py:2815', 'message': 'Using old max (calculated < old_max, no buy_orders_count)', 'data': {'project': project, 'calculated_count': calculated_count, 'old_max': old_max}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
         # #endregion
     
     # Use the stored max count
     total_trades_count = _max_trade_counts[project]
     # #region agent log
-    with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+    with open(DEBUG_LOG_PATH, 'a') as f:
         f.write(json.dumps({'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'C', 'location': 'app.py:2770', 'message': 'Final total_trades_count', 'data': {'project': project, 'calculated_count': calculated_count, 'total_trades_count': total_trades_count, 'old_max': old_max}, 'timestamp': int(datetime.now().timestamp() * 1000)}) + '\n')
     # #endregion
     
@@ -3269,7 +3271,7 @@ def compute_micro_metrics(project=1):
             log_data['status_code'] = response_fills_7d.status_code if hasattr(response_fills_7d, 'status_code') else None
             log_data['status_code_is_200'] = (hasattr(response_fills_7d, 'status_code') and response_fills_7d.status_code == 200)
         try:
-            with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+            with open(DEBUG_LOG_PATH, 'a') as f:
                 import json
                 f.write(json.dumps({'location': 'app.py:3966', 'message': 'fills_7d response check', 'data': log_data, 'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000), 'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'A'}) + '\n')
         except: pass
@@ -3278,7 +3280,7 @@ def compute_micro_metrics(project=1):
         if response_fills_7d and response_fills_7d.status_code == 200:
             # #region agent log - Entered 200 block
             try:
-                with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+                with open(DEBUG_LOG_PATH, 'a') as f:
                     import json
                     f.write(json.dumps({'location': 'app.py:3969', 'message': 'entered status 200 block', 'data': {'project': project}, 'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000), 'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'A'}) + '\n')
             except: pass
@@ -3293,7 +3295,7 @@ def compute_micro_metrics(project=1):
                 log_data['sample_fill_side'] = sample_fill.get('side') if isinstance(sample_fill, dict) else None
                 log_data['sample_fill_symbol'] = sample_fill.get('symbol') if isinstance(sample_fill, dict) else None
             try:
-                with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+                with open(DEBUG_LOG_PATH, 'a') as f:
                     import json
                     f.write(json.dumps({'location': 'app.py:3970', 'message': 'fills_7d structure check', 'data': log_data, 'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000), 'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'B'}) + '\n')
             except: pass
@@ -3320,7 +3322,7 @@ def compute_micro_metrics(project=1):
                 
                 # #region agent log - Hypothesis C: Check baseline filtering
                 try:
-                    with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+                    with open(DEBUG_LOG_PATH, 'a') as f:
                         import json
                         f.write(json.dumps({'location': 'app.py:3985', 'message': 'baseline filtering results', 'data': {'project': project, 'filtered_count': len(fills_7d), 'before_baseline_count': before_baseline_count, 'baseline_start': baseline_start.isoformat()}, 'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000), 'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'C'}) + '\n')
                 except: pass
@@ -3388,7 +3390,7 @@ def compute_micro_metrics(project=1):
                         else:
                             # #region agent log - Hypothesis E: No matching buy for sell
                             try:
-                                with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+                                with open(DEBUG_LOG_PATH, 'a') as f:
                                     import json
                                     f.write(json.dumps({'location': 'app.py:4014', 'message': 'sell without matching buy', 'data': {'project': project, 'symbol': symbol, 'qty': qty, 'open_lots_has_symbol': symbol in open_lots, 'open_lots_count': len(open_lots.get(symbol, []))}, 'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000), 'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'E'}) + '\n')
                             except: pass
@@ -3396,7 +3398,7 @@ def compute_micro_metrics(project=1):
                 
                 # #region agent log - Hypothesis D: Final buy/sell counts and matching results
                 try:
-                    with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+                    with open(DEBUG_LOG_PATH, 'a') as f:
                         import json
                         f.write(json.dumps({'location': 'app.py:4036', 'message': 'buy/sell matching summary', 'data': {'project': project, 'buy_count': buy_count, 'sell_count': sell_count, 'matched_segments_count': len(matched_segments), 'open_lots_symbols': list(open_lots.keys()), 'open_lots_total_qty': {k: sum(lot['qty'] for lot in v) for k, v in open_lots.items()}}, 'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000), 'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'D'}) + '\n')
                 except: pass
@@ -3404,7 +3406,7 @@ def compute_micro_metrics(project=1):
         
         # #region agent log - Final matched segments check
         try:
-            with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+            with open(DEBUG_LOG_PATH, 'a') as f:
                 import json
                 f.write(json.dumps({'location': 'app.py:4037', 'message': 'final matched segments', 'data': {'project': project, 'matched_segments_count': len(matched_segments), 'matched_segments': matched_segments[:3] if len(matched_segments) > 0 else []}, 'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000), 'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'D'}) + '\n')
         except: pass
@@ -3412,7 +3414,7 @@ def compute_micro_metrics(project=1):
         
         # #region agent log - Final summary before aggregation
         try:
-            with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+            with open(DEBUG_LOG_PATH, 'a') as f:
                 import json
                 summary = {
                     'project': project,
@@ -3426,7 +3428,7 @@ def compute_micro_metrics(project=1):
         except Exception as e:
             # Write error to log too
             try:
-                with open(r'c:\Users\mason\OneDrive\Desktop\Cursor\website\.cursor\debug.log', 'a') as f:
+                with open(DEBUG_LOG_PATH, 'a') as f:
                     import json
                     f.write(json.dumps({'location': 'app.py:4079', 'message': 'error writing final summary', 'data': {'project': project, 'error': str(e)}, 'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000), 'sessionId': 'debug-session', 'runId': 'run1', 'hypothesisId': 'ALL'}) + '\n')
             except: pass
