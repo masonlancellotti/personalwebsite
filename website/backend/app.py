@@ -2196,7 +2196,7 @@ def get_project_for_algorithm(algorithm_name):
     # Default to Project 1 for backward compatibility
     return 1
 
-
+@app.route('/algorithms', methods=['GET'])
 @app.route('/api/algorithms', methods=['GET'])
 def get_algorithms():
     """Get list of all trading algorithms."""
@@ -2287,7 +2287,7 @@ def get_algorithms():
         response.headers[header] = value
     return response
 
-
+@app.route('/algorithms/<algorithm_name>', methods=['GET'])
 @app.route('/api/algorithms/<algorithm_name>', methods=['GET'])
 def get_algorithm(algorithm_name):
     """Get details for a specific algorithm."""
@@ -2419,7 +2419,7 @@ def get_day_chart_live_value():
         traceback.print_exc()
         return None, None
 
-
+@app.route('/algorithms/<algorithm_name>/performance', methods=['GET'])
 @app.route('/api/algorithms/<algorithm_name>/performance', methods=['GET'])
 def get_performance(algorithm_name):
     """Get performance data for a specific timeframe using Alpaca portfolio history."""
@@ -2565,7 +2565,7 @@ def get_performance(algorithm_name):
         'as_of_timestamp': as_of_timestamp  # Return separately for display
     })
 
-
+@app.route('/algorithms/<algorithm_name>', methods=['GET'])
 @app.route('/api/live-equity', methods=['GET'])
 def get_live_equity():
     """Get live portfolio equity with extended-hours prices."""
@@ -2574,7 +2574,7 @@ def get_live_equity():
         return jsonify({'error': 'Failed to compute live equity'}), 500
     return jsonify(live_data)
 
-
+@app.route('/portfolio/live_equity_extended', methods=['GET'])
 @app.route('/api/portfolio/live_equity_extended', methods=['GET'])
 def get_portfolio_live_equity_extended():
     """Get live portfolio equity extended using the same data source as Day chart.
@@ -2685,7 +2685,7 @@ def get_portfolio_live_equity_extended():
         traceback.print_exc()
         return jsonify({'error': 'Failed to compute live equity extended'}), 500
 
-
+@app.route('/algorithms/<algorithm_name>/trades', methods=['GET'])
 @app.route('/api/algorithms/<algorithm_name>/trades', methods=['GET'])
 def get_trades(algorithm_name):
     """Get recent trades for an algorithm."""
@@ -2708,7 +2708,7 @@ def get_trades(algorithm_name):
         'total': len(trades)
     })
 
-
+@app.route('/algorithms/<algorithm_name>/stats', methods=['GET'])
 @app.route('/api/algorithms/<algorithm_name>/stats', methods=['GET'])
 def get_stats(algorithm_name):
     """Get statistics for an algorithm."""
@@ -2740,7 +2740,7 @@ def get_stats(algorithm_name):
         }
     })
 
-
+@app.route('/health', methods=['GET'])
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint."""
@@ -3635,7 +3635,7 @@ def compute_micro_metrics(project=1):
     
     return result
 
-
+@app.route('/alpaca/metrics', methods=['GET'])
 @app.route('/api/alpaca/metrics', methods=['GET'])
 def get_alpaca_metrics():
     """Get micro-metrics for a trading algorithm."""
