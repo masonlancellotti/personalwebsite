@@ -1,0 +1,50 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Scene background - applied to main-content when on trading algos page */
+.main-content.scene-bg {
+  position: relative;
+  background-color: #F6F7FB;
+  background-image: 
+    radial-gradient(900px circle at 10% 12%, rgba(148,163,184,0.15), transparent 55%),
+    radial-gradient(1100px circle at 70% 95%, rgba(99,102,241,0.06), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.0) 55%);
+  min-height: 100vh;
+  overflow: visible;
+}
+
+.main-content.scene-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  z-index: 0;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.02) 1px, rgba(0,0,0,0.02) 2px),
+    repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(0,0,0,0.02) 1px, rgba(0,0,0,0.02) 2px),
+    repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 3px);
+  mix-blend-mode: multiply;
+}
+
+.main-content.scene-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+}
+

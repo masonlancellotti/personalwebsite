@@ -1,0 +1,95 @@
+.trading-algos-page {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.page-description {
+  color: #666;
+  margin-bottom: 2rem;
+  font-size: 1.4rem;
+  line-height: 1.6;
+  background: transparent;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.algorithms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(1000px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+  max-width: 100%;
+}
+
+.page-loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.2rem;
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.error {
+  color: #ef4444;
+}
+
+.retry-button {
+  background: #d4a574;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.retry-button:hover {
+  background: #c4955f;
+}
+
+.retry-button:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 1024px) {
+  .algorithms-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .algorithms-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .page-description {
+    font-size: 1.2rem;
+  }
+}
+
