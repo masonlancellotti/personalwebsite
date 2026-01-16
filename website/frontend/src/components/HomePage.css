@@ -12,7 +12,7 @@
 .homepage-layout {
   position: relative;
   display: grid;
-  grid-template-columns: 300px minmax(1115px, 1fr) 450px;
+  grid-template-columns: 300px minmax(0, 1fr) 450px;
   gap: 3rem;
   align-items: start;
   padding-left: 2.725rem;
@@ -29,9 +29,8 @@
 }
 
 .resume-sidebar {
-  position: fixed;
+  position: sticky;
   top: calc(3.5rem + 1.25rem + 1rem);
-  left: 3rem;
   width: 300px;
   flex-shrink: 0;
   z-index: 10;
@@ -55,10 +54,8 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  position: fixed;
-  left: 3rem;
+  position: static;
   width: 300px;
-  top: calc(3.5rem + 1.25rem + 1rem + 420px + 1rem);
 }
 
 .sidebar-links {
@@ -307,9 +304,8 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  position: fixed;
+  position: sticky;
   top: calc(3.5rem + 1.25rem + 1rem);
-  right: 3rem;
   width: 450px;
   align-self: start;
 }
@@ -593,4 +589,6 @@
     font-size: 0.95rem;
   }
 }
-
+.homepage-layout > * {
+  min-width: 0;
+}
