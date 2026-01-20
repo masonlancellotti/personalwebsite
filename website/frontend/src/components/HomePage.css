@@ -473,6 +473,8 @@
   text-decoration: none;
   font-size: 1.1rem;
   transition: color 0.2s;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .right-panel-contact-link:hover {
@@ -535,6 +537,10 @@
   .right-panel-link,
   .right-panel-contact-link {
     font-size: 0.95rem !important;
+  }
+  
+  .right-panel-contact-label {
+    font-size: 0.85rem !important;
   }
   
   .sidebar-links a {
@@ -603,6 +609,10 @@
     font-size: 0.9rem !important;
   }
   
+  .right-panel-contact-label {
+    font-size: 0.8rem !important;
+  }
+  
   .sidebar-links a {
     font-size: 0.9rem !important;
   }
@@ -669,6 +679,10 @@
     font-size: 0.85rem !important;
   }
   
+  .right-panel-contact-label {
+    font-size: 0.75rem !important;
+  }
+  
   .sidebar-links a {
     font-size: 0.85rem !important;
   }
@@ -733,6 +747,10 @@
   .right-panel-link,
   .right-panel-contact-link {
     font-size: 0.8rem !important;
+  }
+  
+  .right-panel-contact-label {
+    font-size: 0.7rem !important;
   }
   
   .sidebar-links a {
