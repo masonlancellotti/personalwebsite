@@ -479,10 +479,252 @@
   color: #d4a574;
 }
 
+/* Intermediate breakpoints for better aspect ratio handling */
+@media (max-width: 1600px) {
+  .homepage-layout {
+    grid-template-columns: 280px minmax(600px, 1fr) 400px;
+    gap: 2.5rem;
+  }
+  
+  .resume-sidebar {
+    width: 280px;
+  }
+  
+  .left-column-cards {
+    width: 280px;
+  }
+  
+  .right-panel {
+    width: 400px;
+  }
+  
+  /* Slight font reduction */
+  .resume-name {
+    font-size: 2.75rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .item-title {
+    font-size: 1.3rem;
+  }
+  
+  .item-subtitle {
+    font-size: 1.15rem;
+  }
+  
+  .resume-contact {
+    font-size: 1.2rem;
+  }
+  
+  .resume-item p,
+  .item-bullets li,
+  .item-location,
+  .item-date {
+    font-size: 1.05rem;
+  }
+  
+  .right-panel-text,
+  .right-panel-link,
+  .right-panel-contact-link {
+    font-size: 1.05rem;
+  }
+  
+  .sidebar-links a {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 1500px) {
+  .homepage-layout {
+    grid-template-columns: 250px minmax(550px, 1fr) 350px;
+    gap: 2rem;
+  }
+  
+  .resume-sidebar {
+    width: 250px;
+  }
+  
+  .left-column-cards {
+    width: 250px;
+  }
+  
+  .right-panel {
+    width: 350px;
+  }
+  
+  /* Further font reduction */
+  .resume-name {
+    font-size: 2.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.4rem;
+  }
+  
+  .item-title {
+    font-size: 1.25rem;
+  }
+  
+  .item-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .resume-contact {
+    font-size: 1.1rem;
+  }
+  
+  .resume-item p,
+  .item-bullets li,
+  .item-location,
+  .item-date {
+    font-size: 1rem;
+  }
+  
+  .right-panel-text,
+  .right-panel-link,
+  .right-panel-contact-link {
+    font-size: 1rem;
+  }
+  
+  .sidebar-links a {
+    font-size: 1rem;
+  }
+  
+  .right-panel-title {
+    font-size: 1.1rem;
+  }
+}
+
 @media (max-width: 1400px) {
   .homepage-layout {
-    grid-template-columns: 300px 1fr 450px;
-    max-width: 100%;
+    grid-template-columns: 230px minmax(500px, 1fr) 320px;
+    gap: 2rem;
+  }
+  
+  .resume-sidebar {
+    width: 230px;
+  }
+  
+  .left-column-cards {
+    width: 230px;
+  }
+  
+  .right-panel {
+    width: 320px;
+  }
+  
+  /* Continue font reduction */
+  .resume-name {
+    font-size: 2.25rem;
+  }
+  
+  .section-title {
+    font-size: 1.3rem;
+  }
+  
+  .item-title {
+    font-size: 1.2rem;
+  }
+  
+  .item-subtitle {
+    font-size: 1.05rem;
+  }
+  
+  .resume-contact {
+    font-size: 1.05rem;
+  }
+  
+  .resume-item p,
+  .item-bullets li,
+  .item-location,
+  .item-date {
+    font-size: 0.95rem;
+  }
+  
+  .right-panel-text,
+  .right-panel-link,
+  .right-panel-contact-link {
+    font-size: 0.95rem;
+  }
+  
+  .sidebar-links a {
+    font-size: 0.95rem;
+  }
+  
+  .right-panel-title {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 1300px) {
+  .homepage-layout {
+    grid-template-columns: 200px minmax(450px, 1fr) 280px;
+    gap: 1.75rem;
+  }
+  
+  .resume-sidebar {
+    width: 200px;
+  }
+  
+  .left-column-cards {
+    width: 200px;
+  }
+  
+  .right-panel {
+    width: 280px;
+  }
+  
+  /* More aggressive font reduction */
+  .resume-name {
+    font-size: 2rem;
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+  }
+  
+  .item-title {
+    font-size: 1.15rem;
+  }
+  
+  .item-subtitle {
+    font-size: 1rem;
+  }
+  
+  .resume-contact {
+    font-size: 1rem;
+  }
+  
+  .resume-item p,
+  .item-bullets li,
+  .item-location,
+  .item-date {
+    font-size: 0.9rem;
+  }
+  
+  .right-panel-text,
+  .right-panel-link,
+  .right-panel-contact-link {
+    font-size: 0.9rem;
+  }
+  
+  .sidebar-links a {
+    font-size: 0.9rem;
+  }
+  
+  .right-panel-title {
+    font-size: 1rem;
+  }
+  
+  .right-panel-grid .right-panel-title {
+    font-size: 0.85rem;
+  }
+  
+  .right-panel-grid .right-panel-text {
+    font-size: 0.9rem;
   }
 }
 
@@ -529,6 +771,34 @@
     top: auto;
     max-height: none;
     overflow: visible;
+  }
+  
+  /* Reset font sizes for stacked layout */
+  .resume-name {
+    font-size: 2rem;
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+  }
+  
+  .item-title {
+    font-size: 1.1rem;
+  }
+  
+  .item-subtitle {
+    font-size: 0.95rem;
+  }
+  
+  .resume-contact {
+    font-size: 0.95rem;
+  }
+  
+  .resume-item p,
+  .item-bullets li,
+  .item-location,
+  .item-date {
+    font-size: 0.9rem;
   }
 }
 
