@@ -482,74 +482,8 @@
 /* Intermediate breakpoints for better aspect ratio handling */
 @media (max-width: 1600px) {
   .homepage-layout {
-    grid-template-columns: 240px minmax(700px, 1fr) 360px;
+    grid-template-columns: 200px minmax(750px, 1fr) 300px;
     gap: 2.5rem;
-  }
-  
-  .resume-sidebar {
-    width: 240px !important;
-    flex-shrink: 1;
-  }
-  
-  .left-column-cards {
-    width: 240px !important;
-  }
-  
-  .left-column-cards .right-panel-card {
-    width: 240px !important;
-  }
-  
-  .right-panel {
-    width: 360px !important;
-  }
-  
-  /* Slight font reduction */
-  .resume-name {
-    font-size: 2.75rem !important;
-  }
-  
-  .section-title {
-    font-size: 1.5rem !important;
-  }
-  
-  .item-title {
-    font-size: 1.3rem !important;
-  }
-  
-  .item-subtitle {
-    font-size: 1.15rem !important;
-  }
-  
-  .resume-contact {
-    font-size: 1.2rem !important;
-  }
-  
-  .resume-item p,
-  .item-bullets li,
-  .item-location,
-  .item-date {
-    font-size: 1.05rem !important;
-  }
-  
-  .right-panel-text,
-  .right-panel-link,
-  .right-panel-contact-link {
-    font-size: 1.05rem !important;
-  }
-  
-  .sidebar-links a {
-    font-size: 1.05rem !important;
-  }
-  
-  .right-panel-title {
-    font-size: 1.15rem !important;
-  }
-}
-
-@media (max-width: 1500px) {
-  .homepage-layout {
-    grid-template-columns: 200px minmax(650px, 1fr) 300px;
-    gap: 2rem;
   }
   
   .resume-sidebar {
@@ -569,7 +503,7 @@
     width: 300px !important;
   }
   
-  /* Further font reduction */
+  /* More significant font reduction */
   .resume-name {
     font-size: 2.5rem !important;
   }
@@ -594,120 +528,54 @@
   .item-bullets li,
   .item-location,
   .item-date {
-    font-size: 1rem !important;
+    font-size: 0.95rem !important;
   }
   
   .right-panel-text,
   .right-panel-link,
   .right-panel-contact-link {
-    font-size: 1rem !important;
+    font-size: 0.95rem !important;
   }
   
   .sidebar-links a {
-    font-size: 1rem !important;
+    font-size: 0.95rem !important;
   }
   
   .right-panel-title {
-    font-size: 1.1rem !important;
+    font-size: 1.05rem !important;
   }
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1500px) {
   .homepage-layout {
-    grid-template-columns: 180px minmax(600px, 1fr) 260px;
+    grid-template-columns: 170px minmax(700px, 1fr) 250px;
     gap: 2rem;
   }
   
   .resume-sidebar {
-    width: 180px !important;
+    width: 170px !important;
     flex-shrink: 1;
   }
   
   .left-column-cards {
-    width: 180px !important;
+    width: 170px !important;
   }
   
   .left-column-cards .right-panel-card {
-    width: 180px !important;
+    width: 170px !important;
   }
   
   .right-panel {
-    width: 260px !important;
+    width: 250px !important;
   }
   
-  /* Continue font reduction */
+  /* Further font reduction */
   .resume-name {
     font-size: 2.25rem !important;
   }
   
   .section-title {
     font-size: 1.3rem !important;
-  }
-  
-  .item-title {
-    font-size: 1.2rem !important;
-  }
-  
-  .item-subtitle {
-    font-size: 1.05rem !important;
-  }
-  
-  .resume-contact {
-    font-size: 1.05rem !important;
-  }
-  
-  .resume-item p,
-  .item-bullets li,
-  .item-location,
-  .item-date {
-    font-size: 0.95rem !important;
-  }
-  
-  .right-panel-text,
-  .right-panel-link,
-  .right-panel-contact-link {
-    font-size: 0.95rem !important;
-  }
-  
-  .sidebar-links a {
-    font-size: 0.95rem !important;
-  }
-  
-  .right-panel-title {
-    font-size: 1.05rem !important;
-  }
-}
-
-@media (max-width: 1300px) {
-  .homepage-layout {
-    grid-template-columns: 160px minmax(550px, 1fr) 220px;
-    gap: 1.75rem;
-  }
-  
-  .resume-sidebar {
-    width: 160px !important;
-    flex-shrink: 1;
-  }
-  
-  .left-column-cards {
-    width: 160px !important;
-  }
-  
-  .left-column-cards .right-panel-card {
-    width: 160px !important;
-  }
-  
-  .right-panel {
-    width: 220px !important;
-  }
-  
-  /* More aggressive font reduction */
-  .resume-name {
-    font-size: 2rem !important;
-  }
-  
-  .section-title {
-    font-size: 1.2rem !important;
   }
   
   .item-title {
@@ -742,13 +610,145 @@
   .right-panel-title {
     font-size: 1rem !important;
   }
+}
+
+@media (max-width: 1400px) {
+  .homepage-layout {
+    grid-template-columns: 150px minmax(650px, 1fr) 220px;
+    gap: 2rem;
+  }
   
-  .right-panel-grid .right-panel-title {
+  .resume-sidebar {
+    width: 150px !important;
+    flex-shrink: 1;
+  }
+  
+  .left-column-cards {
+    width: 150px !important;
+  }
+  
+  .left-column-cards .right-panel-card {
+    width: 150px !important;
+  }
+  
+  .right-panel {
+    width: 220px !important;
+  }
+  
+  /* Continue font reduction */
+  .resume-name {
+    font-size: 2rem !important;
+  }
+  
+  .section-title {
+    font-size: 1.2rem !important;
+  }
+  
+  .item-title {
+    font-size: 1.1rem !important;
+  }
+  
+  .item-subtitle {
+    font-size: 0.95rem !important;
+  }
+  
+  .resume-contact {
+    font-size: 0.95rem !important;
+  }
+  
+  .resume-item p,
+  .item-bullets li,
+  .item-location,
+  .item-date {
     font-size: 0.85rem !important;
   }
   
-  .right-panel-grid .right-panel-text {
+  .right-panel-text,
+  .right-panel-link,
+  .right-panel-contact-link {
+    font-size: 0.85rem !important;
+  }
+  
+  .sidebar-links a {
+    font-size: 0.85rem !important;
+  }
+  
+  .right-panel-title {
+    font-size: 0.95rem !important;
+  }
+}
+
+@media (max-width: 1300px) {
+  .homepage-layout {
+    grid-template-columns: 140px minmax(600px, 1fr) 200px;
+    gap: 1.75rem;
+  }
+  
+  .resume-sidebar {
+    width: 140px !important;
+    flex-shrink: 1;
+  }
+  
+  .left-column-cards {
+    width: 140px !important;
+  }
+  
+  .left-column-cards .right-panel-card {
+    width: 140px !important;
+  }
+  
+  .right-panel {
+    width: 200px !important;
+  }
+  
+  /* More aggressive font reduction */
+  .resume-name {
+    font-size: 1.85rem !important;
+  }
+  
+  .section-title {
+    font-size: 1.1rem !important;
+  }
+  
+  .item-title {
+    font-size: 1.05rem !important;
+  }
+  
+  .item-subtitle {
     font-size: 0.9rem !important;
+  }
+  
+  .resume-contact {
+    font-size: 0.9rem !important;
+  }
+  
+  .resume-item p,
+  .item-bullets li,
+  .item-location,
+  .item-date {
+    font-size: 0.8rem !important;
+  }
+  
+  .right-panel-text,
+  .right-panel-link,
+  .right-panel-contact-link {
+    font-size: 0.8rem !important;
+  }
+  
+  .sidebar-links a {
+    font-size: 0.8rem !important;
+  }
+  
+  .right-panel-title {
+    font-size: 0.9rem !important;
+  }
+  
+  .right-panel-grid .right-panel-title {
+    font-size: 0.75rem !important;
+  }
+  
+  .right-panel-grid .right-panel-text {
+    font-size: 0.8rem !important;
   }
 }
 
