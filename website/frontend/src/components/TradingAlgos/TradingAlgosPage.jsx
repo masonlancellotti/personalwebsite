@@ -70,7 +70,7 @@ function TradingAlgosPage() {
       setLoadingMessage('Analyzing portfolio performance...')
       setAlgorithms(data)
       // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/9d64e218-9bd1-44d8-aab6-5e10b2f6ec39',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TradingAlgosPage.jsx:36',message:'BEFORE setLoading(false)',data:{algorithmsSet:data.length},timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7245/ingest/9d64e218-9bd1-44d8-aab6-5e10b2f6ec39',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TradingAlgosPage.jsx:36',message:'BEFORE setLoading(false)',data:{algorithmsSet:data.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
       setLoading(false) // Show page immediately
       // #region agent log
