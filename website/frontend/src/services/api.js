@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+// Use relative URL in development to leverage Vite proxy, or absolute URL from env
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'http://localhost:5000/api')
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -17,10 +18,20 @@ const encodeAlgorithmName = (name) => {
 
 export const getAlgorithms = async () => {
   try {
+    console.log('Fetching algorithms from:', `${api.defaults.baseURL}/algorithms`)
     const response = await api.get('/algorithms')
+    console.log('Algorithms response:', response.data)
     return response.data
   } catch (error) {
-    console.error('API Error:', error)
+    console.error('API Error fetching algorithms:', error)
+    if (error.response) {
+      console.error('Response status:', error.response.status)
+      console.error('Response data:', error.response.data)
+    } else if (error.request) {
+      console.error('No response received. Request:', error.request)
+    } else {
+      console.error('Error setting up request:', error.message)
+    }
     throw error
   }
 }

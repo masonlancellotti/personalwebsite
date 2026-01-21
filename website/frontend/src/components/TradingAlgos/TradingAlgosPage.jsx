@@ -49,45 +49,75 @@ function TradingAlgosPage() {
       fetch('http://127.0.0.1:7245/ingest/9d64e218-9bd1-44d8-aab6-5e10b2f6ec39',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TradingAlgosPage.jsx:32',message:'AFTER getAlgorithms',data:{dataType:Array.isArray(data)?'array':'other',dataLength:Array.isArray(data)?data.length:'N/A',hasData:!!data},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
       // #endregion
       
-      // Only update if we got valid data (array with items)
-      if (Array.isArray(data) && data.length > 0) {
-        setLoadingMessage('Analyzing portfolio performance...')
-        setAlgorithms(data)
-        // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/9d64e218-9bd1-44d8-aab6-5e10b2f6ec39',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TradingAlgosPage.jsx:36',message:'BEFORE setLoading(false)',data:{algorithmsSet:data.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
-        setLoading(false) // Show page immediately
-        // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/9d64e218-9bd1-44d8-aab6-5e10b2f6ec39',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TradingAlgosPage.jsx:37',message:'AFTER setLoading(false)',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
-        
-        // Then fetch micro-metrics in background (slower, but non-blocking)
-        Promise.all([
-          getAlpacaMetrics(1).catch(() => ({})),
-          getAlpacaMetrics(2).catch(() => ({})),
-          getAlpacaMetrics(3).catch(() => ({}))
-        ]).then(([metrics1, metrics2, metrics3]) => {
-          setMetricsMap({
-            1: metrics1,
-            2: metrics2,
-            3: metrics3
-          })
-        }).catch(err => {
-          console.error('Error fetching micro-metrics:', err)
-          // Silently fail - micro-metrics will show dashes
-        })
-      } else {
-        // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/9d64e218-9bd1-44d8-aab6-5e10b2f6ec39',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TradingAlgosPage.jsx:55',message:'Invalid data branch',data:{dataType:typeof data,isArray:Array.isArray(data)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
-        throw new Error('Invalid data received from API')
+      // Check if we got valid data
+      if (!data) {
+        throw new Error('No data received from API')
       }
+      
+      if (!Array.isArray(data)) {
+        throw new Error(`Invalid data format: expected array, got ${typeof data}`)
+      }
+      
+      // Allow empty array - backend should always return at least 2 algorithms, but handle gracefully
+      if (data.length === 0) {
+        console.warn('API returned empty algorithms array')
+        // Still set it so the page can render (just won't show any cards)
+        setAlgorithms([])
+        setLoading(false)
+        return
+      }
+      
+      setLoadingMessage('Analyzing portfolio performance...')
+      setAlgorithms(data)
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/9d64e218-9bd1-44d8-aab6-5e10b2f6ec39',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TradingAlgosPage.jsx:36',message:'BEFORE setLoading(false)',data:{algorithmsSet:data.length},timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      setLoading(false) // Show page immediately
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/9d64e218-9bd1-44d8-aab6-5e10b2f6ec39',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TradingAlgosPage.jsx:37',message:'AFTER setLoading(false)',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      
+      // Then fetch micro-metrics in background (slower, but non-blocking)
+      Promise.all([
+        getAlpacaMetrics(1).catch(() => ({})),
+        getAlpacaMetrics(2).catch(() => ({})),
+        getAlpacaMetrics(3).catch(() => ({}))
+      ]).then(([metrics1, metrics2, metrics3]) => {
+        setMetricsMap({
+          1: metrics1,
+          2: metrics2,
+          3: metrics3
+        })
+      }).catch(err => {
+        console.error('Error fetching micro-metrics:', err)
+        // Silently fail - micro-metrics will show dashes
+      })
     } catch (err) {
       // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/9d64e218-9bd1-44d8-aab6-5e10b2f6ec39',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TradingAlgosPage.jsx:57',message:'CATCH block',data:{errorMessage:err?.message,errorName:err?.name,errorStack:err?.stack?.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,D'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7245/ingest/9d64e218-9bd1-44d8-aab6-5e10b2f6ec39',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TradingAlgosPage.jsx:57',message:'CATCH block',data:{errorMessage:err?.message,errorName:err?.name,errorStack:err?.stack?.substring(0,200),responseStatus:err?.response?.status,responseData:err?.response?.data},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,D'})}).catch(()=>{});
       // #endregion
       console.error('Error fetching algorithms:', err)
-      setError('Failed to load trading algorithms. Please refresh the page.')
+      
+      // Provide more helpful error messages
+      let errorMessage = 'Failed to load trading algorithms. '
+      if (err?.response) {
+        // Server responded with error status
+        errorMessage += `Server error (${err.response.status}). `
+        if (err.response.status === 404) {
+          errorMessage += 'API endpoint not found. Please check if the backend server is running.'
+        } else if (err.response.status >= 500) {
+          errorMessage += 'Server error. Please try again later.'
+        }
+      } else if (err?.request) {
+        // Request was made but no response received
+        errorMessage += 'Unable to connect to the server. Please check if the backend is running.'
+      } else {
+        // Something else happened
+        errorMessage += err?.message || 'Unknown error occurred.'
+      }
+      errorMessage += ' Please refresh the page.'
+      
+      setError(errorMessage)
       // Don't set fallback data - keep algorithms empty to show error state
       setAlgorithms([])
       setLoading(false)
