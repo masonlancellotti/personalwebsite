@@ -1,18 +1,73 @@
 """
 Technical indicators module.
 
-Manual implementations of RSI, MACD, and ATR using Wilder smoothing.
+Manual implementations of RSI, MACD, ATR, and SMA using Wilder smoothing.
 No external TA library dependencies.
 """
 
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List, Sequence
 import numpy as np
 import pandas as pd
 
 from config import get_config, IndicatorConfig
 
 logger = logging.getLogger("tradingbot.indicators")
+
+
+def sma(values: Sequence[float], period: int) -> List[Optional[float]]:
+    """
+    Simple Moving Average.
+    
+    Args:
+        values: Sequence of values.
+        period: SMA period.
+    
+    Returns:
+        List of SMA values (None until enough bars exist).
+    """
+    result: List[Optional[float]] = []
+    values_list = list(values)
+    
+    for i in range(len(values_list)):
+        if i < period - 1:
+            result.append(None)
+        else:
+            window = values_list[i - period + 1:i + 1]
+            result.append(sum(window) / period)
+    
+    return result
+
+
+def last_sma(values: Sequence[float], period: int) -> Optional[float]:
+    """
+    Get the last SMA value.
+    
+    Args:
+        values: Sequence of values.
+        period: SMA period.
+    
+    Returns:
+        Last SMA value, or None if not enough bars.
+    """
+    values_list = list(values)
+    if len(values_list) < period:
+        return None
+    return sum(values_list[-period:]) / period
+
+
+def calculate_sma(close: pd.Series, period: int) -> pd.Series:
+    """
+    Calculate Simple Moving Average for a pandas Series.
+    
+    Args:
+        close: Series of closing prices.
+        period: SMA period.
+    
+    Returns:
+        pd.Series: SMA values (NaN until enough bars exist).
+    """
+    return close.rolling(window=period, min_periods=period).mean()
 
 
 def wilder_smoothing(values: pd.Series, period: int) -> pd.Series:
@@ -216,7 +271,8 @@ class TechnicalIndicators:
         
         Returns:
             DataFrame with added indicator columns:
-            rsi, macd, macd_signal, macd_hist, atr, macd_bullish_cross, macd_bearish_cross
+            rsi, macd, macd_signal, macd_hist, atr, macd_bullish_cross, macd_bearish_cross,
+            sma_fast, sma_slow
         """
         result = df.copy()
         
@@ -245,6 +301,10 @@ class TechnicalIndicators:
             self._config.atr_period
         )
         
+        # SMAs for trend filter
+        result['sma_fast'] = calculate_sma(df['close'], self._config.trend_sma_fast)
+        result['sma_slow'] = calculate_sma(df['close'], self._config.trend_sma_slow)
+        
         self._indicators = result
         return result
     
@@ -270,6 +330,9 @@ class TechnicalIndicators:
                 'macd': None,
                 'macd_signal': None,
                 'atr': None,
+                'sma_fast': None,
+                'sma_slow': None,
+                'close': None,
                 'bullish_cross': False,
                 'bearish_cross': False,
                 'long_technical': False,
@@ -292,6 +355,9 @@ class TechnicalIndicators:
             'macd': float(latest['macd']) if pd.notna(latest['macd']) else None,
             'macd_signal': float(latest['macd_signal']) if pd.notna(latest['macd_signal']) else None,
             'atr': float(latest['atr']) if pd.notna(latest['atr']) else None,
+            'sma_fast': float(latest['sma_fast']) if pd.notna(latest.get('sma_fast')) else None,
+            'sma_slow': float(latest['sma_slow']) if pd.notna(latest.get('sma_slow')) else None,
+            'close': float(latest['close']) if pd.notna(latest.get('close')) else None,
             'bullish_cross': bullish_cross,
             'bearish_cross': bearish_cross,
             'long_technical': long_technical,

@@ -533,11 +533,14 @@ def run_server(host: Optional[str] = None, port: Optional[int] = None) -> None:
     configure_cors(app)
     
     logger.info(f"Starting API server on {host}:{port}")
+    
+    # Use string path on Windows to avoid signal handling issues
     uvicorn.run(
-        app,
+        "api_server:app",
         host=host,
         port=port,
-        reload=config.reload
+        reload=config.reload,
+        log_level="info"
     )
 
 

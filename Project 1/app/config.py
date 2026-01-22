@@ -73,27 +73,40 @@ class HMMConfig:
 class IndicatorConfig:
     """Technical indicator configuration."""
     rsi_period: int = 14
-    rsi_oversold: float = field(default_factory=lambda: _get_float_env("RSI_OVERSOLD", 40.0))
-    rsi_overbought: float = field(default_factory=lambda: _get_float_env("RSI_OVERBOUGHT", 60.0))
+    rsi_oversold: float = field(default_factory=lambda: _get_float_env("RSI_OVERSOLD", 35.0))
+    rsi_overbought: float = field(default_factory=lambda: _get_float_env("RSI_OVERBOUGHT", 65.0))
     macd_fast: int = 12
     macd_slow: int = 26
     macd_signal: int = 9
     atr_period: int = 14
+    # Trend filter SMAs
+    trend_filter_enabled: bool = field(default_factory=lambda: _get_bool_env("TREND_FILTER_ENABLED", True))
+    trend_sma_fast: int = field(default_factory=lambda: _get_int_env("TREND_SMA_FAST", 50))
+    trend_sma_slow: int = field(default_factory=lambda: _get_int_env("TREND_SMA_SLOW", 200))
 
 
 @dataclass
 class SentimentConfig:
     """Sentiment analysis configuration."""
     model_name: str = "ProsusAI/finbert"
-    positive_threshold: float = field(default_factory=lambda: _get_float_env("SENTIMENT_POS_THRESHOLD", 0.40))
-    negative_threshold: float = field(default_factory=lambda: _get_float_env("SENTIMENT_NEG_THRESHOLD", 0.40))
     aggregation_method: str = field(default_factory=lambda: os.getenv("SENTIMENT_AGG_METHOD", "mean"))
-    news_lookback_days: int = field(default_factory=lambda: _get_int_env("NEWS_LOOKBACK_DAYS", 3))
-    cache_file: str = "sentiment_cache.parquet"
-    # If True, skip sentiment entirely (technical + regime only) - good for backtest
-    skip_sentiment: bool = field(default_factory=lambda: _get_bool_env("SKIP_SENTIMENT", True))
-    # If True, skip sentiment check when no news available
-    skip_when_no_news: bool = field(default_factory=lambda: _get_bool_env("SENTIMENT_SKIP_NO_NEWS", True))
+    cache_file: str = "sentiment_cache.csv"
+    
+    # Sentiment mode: "soft" | "strict" | "off"
+    mode: str = field(default_factory=lambda: os.getenv("SENTIMENT_MODE", "soft"))
+    lookback_days: int = field(default_factory=lambda: _get_int_env("SENTIMENT_LOOKBACK_DAYS", 3))
+    min_articles: int = field(default_factory=lambda: _get_int_env("SENTIMENT_MIN_ARTICLES", 1))
+    
+    # Strict mode thresholds
+    strict_long_pos: float = field(default_factory=lambda: _get_float_env("SENTIMENT_STRICT_LONG_POS", 0.60))
+    strict_short_neg: float = field(default_factory=lambda: _get_float_env("SENTIMENT_STRICT_SHORT_NEG", 0.60))
+    
+    # Soft mode thresholds
+    soft_min_confirm: float = field(default_factory=lambda: _get_float_env("SENTIMENT_SOFT_MIN_CONFIRM", 0.45))
+    soft_max_opposite: float = field(default_factory=lambda: _get_float_env("SENTIMENT_SOFT_MAX_OPPOSITE", 0.60))
+    
+    # Timeout for fetching (RSS)
+    timeout_sec: int = field(default_factory=lambda: _get_int_env("SENTIMENT_TIMEOUT_SEC", 10))
 
 
 @dataclass
@@ -103,9 +116,23 @@ class RiskConfig:
     atr_multiplier: float = field(default_factory=lambda: _get_float_env("ATR_MULTIPLIER", 1.5))
     max_position_pct: float = field(default_factory=lambda: _get_float_env("MAX_POSITION_PCT", 10.0))
     max_gross_exposure_pct: float = field(default_factory=lambda: _get_float_env("MAX_GROSS_EXPOSURE_PCT", 100.0))
-    hard_stop_pct: float = field(default_factory=lambda: _get_float_env("HARD_STOP_PCT", 2.0))
+    
+    # Stop loss configuration
+    hard_stop_pct: float = field(default_factory=lambda: _get_float_env("HARD_STOP_PCT", 0.02))  # 2%
+    stop_atr_mult: float = field(default_factory=lambda: _get_float_env("STOP_ATR_MULT", 1.5))
+    
+    # Trailing stop
     trailing_activation_pct: float = field(default_factory=lambda: _get_float_env("TRAILING_ACTIVATION_PCT", 5.0))
     trailing_stop_pct: float = field(default_factory=lambda: _get_float_env("TRAILING_STOP_PCT", 2.0))
+    
+    # Time stop
+    time_stop_enabled: bool = field(default_factory=lambda: _get_bool_env("TIME_STOP_ENABLED", True))
+    max_hold_days: int = field(default_factory=lambda: _get_int_env("MAX_HOLD_DAYS", 10))
+    
+    # Cooldown after hard stop
+    cooldown_days_after_hard_stop: int = field(default_factory=lambda: _get_int_env("COOLDOWN_DAYS_AFTER_HARD_STOP", 3))
+    
+    # Regime exit
     regime_flip_exit: bool = field(default_factory=lambda: _get_bool_env("REGIME_FLIP_EXIT", False))
 
 
@@ -161,14 +188,19 @@ class RSSConfig:
         "https://feeds.marketwatch.com/marketwatch/topstories/",
         "https://seekingalpha.com/feed.xml",
     ])
+    lookback_days: int = field(default_factory=lambda: _get_int_env("RSS_LOOKBACK_DAYS", 3))
+    timeout_sec: int = field(default_factory=lambda: _get_int_env("RSS_TIMEOUT_SEC", 10))
+    historical_notice: bool = field(default_factory=lambda: _get_bool_env("RSS_HISTORICAL_NOTICE", True))
 
 
 @dataclass
 class LiveConfig:
     """Live trading configuration."""
     scan_interval_minutes: int = field(default_factory=lambda: _get_int_env("LIVE_SCAN_INTERVAL", 60))
+    scan_interval_seconds: int = field(default_factory=lambda: _get_int_env("LIVE_INTERVAL_SEC", 300))
     daily_run_time: str = field(default_factory=lambda: os.getenv("LIVE_RUN_TIME", "09:35"))
-    mode: str = field(default_factory=lambda: os.getenv("LIVE_MODE", "scheduled"))  # "scheduled" or "interval"
+    mode: str = field(default_factory=lambda: os.getenv("LIVE_MODE", "interval"))  # "scheduled" or "interval"
+    run_once_default: bool = field(default_factory=lambda: _get_bool_env("LIVE_RUN_ONCE_DEFAULT", False))
 
 
 @dataclass
@@ -214,4 +246,3 @@ def get_config() -> Config:
     if _config is None:
         _config = load_config()
     return _config
-

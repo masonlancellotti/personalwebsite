@@ -105,47 +105,80 @@ def run_live(args) -> None:
     # Validate account
     client_manager = get_client_manager()
     mode = "PAPER" if client_manager.is_paper else "LIVE"
-    logger.info(f"Running in {mode} mode")
+    
+    # Use seconds interval from config
+    interval_seconds = config.live.scan_interval_seconds
+    run_once = args.once or config.live.run_once_default
+    
+    # Startup log
+    local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logger.info("=" * 60)
+    logger.info(f"LIVE TRADING BOT STARTING")
+    logger.info(f"  Mode: {mode}")
+    logger.info(f"  Interval: {interval_seconds} seconds")
+    logger.info(f"  Run once: {run_once}")
+    logger.info(f"  Dry run: {args.dry_run}")
+    logger.info(f"  Local time: {local_time}")
+    logger.info("=" * 60)
     
     valid, msg = client_manager.validate_account_for_shorting()
     if not valid:
         logger.warning(f"Account validation: {msg}")
     
     # Initialize components
+    init_start = time.time()
     strategy = get_strategy()
     strategy.initialize()
+    init_duration = time.time() - init_start
     
     data_provider = get_data_provider()
     portfolio_manager = LivePortfolioManager()
     symbols = get_universe_with_proxy()
     
-    logger.info(f"Bot initialized with {len(symbols)} symbols")
+    logger.info(f"Bot initialized with {len(symbols)} symbols (took {init_duration:.1f}s)")
     
     def run_scan():
-        """Execute one scan cycle."""
+        """Execute one scan cycle with timing."""
+        tick_start = time.time()
         logger.info("=" * 60)
-        logger.info("Starting scan cycle")
+        logger.info(f"LIVE TICK start at {datetime.now().strftime('%H:%M:%S')}")
         update_bot_state(scan_time=utc_now())
         
         try:
-            # Fetch latest data
+            # Step 1: Fetch latest data
+            step_start = time.time()
             symbol_data = data_provider.get_latest_bars(symbols)
-            logger.info(f"Fetched data for {len(symbol_data)} symbols")
+            bars_duration = time.time() - step_start
+            logger.info(f"Fetched {len(symbol_data)} symbols ({bars_duration:.1f}s)")
             
-            # Generate signals
+            # Step 2: Get regime
+            step_start = time.time()
+            regime, bull, bear, side = strategy._regime_detector.get_current_regime()
+            regime_duration = time.time() - step_start
+            logger.info(f"Regime: {regime.value} (bull={bull:.2f}, bear={bear:.2f}, side={side:.2f}) ({regime_duration:.1f}s)")
+            
+            # Step 3: Generate signals
+            step_start = time.time()
             signals = strategy.get_actionable_signals(symbol_data, utc_now())
-            logger.info(f"Generated {len(signals)} actionable signals")
+            signals_duration = time.time() - step_start
+            logger.info(f"Generated {len(signals)} signals ({signals_duration:.1f}s)")
             
             update_bot_state(decision_time=utc_now())
             
-            # Execute signals
+            # Step 4: Execute signals
+            step_start = time.time()
+            orders_placed = 0
             for signal in signals:
-                logger.info(f"Signal: {signal.signal_type.value.upper()} {signal.symbol}")
+                logger.info(
+                    f"Signal: {signal.signal_type.value.upper()} {signal.symbol} | "
+                    f"RSI={signal.rsi:.1f if signal.rsi else 0} | "
+                    f"Sentiment={signal.sentiment_str}"
+                )
                 
                 if not args.dry_run:
                     side = "buy" if signal.signal_type.value == "long" else "sell"
                     
-                    # Calculate position size (simplified for live)
+                    # Calculate position size
                     equity = portfolio_manager.get_account_equity()
                     position_value = equity * (config.risk.max_position_pct / 100) * 0.5
                     
@@ -161,29 +194,40 @@ def run_live(args) -> None:
                             )
                             if success:
                                 logger.info(f"Order placed: {side} {qty} {signal.symbol}")
+                                orders_placed += 1
                             else:
                                 logger.error(f"Order failed: {msg}")
                 else:
                     logger.info(f"DRY RUN: Would {signal.signal_type.value} {signal.symbol}")
             
-            logger.info("Scan cycle complete")
+            orders_duration = time.time() - step_start
+            
+            # Summary
+            tick_duration = time.time() - tick_start
+            logger.info(
+                f"LIVE TICK complete | "
+                f"signals={len(signals)}, orders={orders_placed} | "
+                f"total={tick_duration:.1f}s (bars={bars_duration:.1f}s, regime={regime_duration:.1f}s, "
+                f"signals={signals_duration:.1f}s, orders={orders_duration:.1f}s)"
+            )
             
         except Exception as e:
             logger.error(f"Error in scan cycle: {e}", exc_info=True)
     
     # Run mode
-    if args.once:
+    if run_once:
         # Single run
+        logger.info("Running single scan (--once mode)")
         run_scan()
+        logger.info("Single scan complete, exiting")
     else:
         # Continuous loop
-        interval_seconds = config.live.scan_interval_minutes * 60
-        logger.info(f"Starting continuous loop (interval: {config.live.scan_interval_minutes} min)")
+        logger.info(f"Starting continuous loop (interval: {interval_seconds} seconds)")
         
         while True:
             try:
                 run_scan()
-                logger.info(f"Sleeping for {config.live.scan_interval_minutes} minutes")
+                logger.info(f"Sleeping for {interval_seconds} seconds...")
                 time.sleep(interval_seconds)
             except KeyboardInterrupt:
                 logger.info("Interrupted by user")

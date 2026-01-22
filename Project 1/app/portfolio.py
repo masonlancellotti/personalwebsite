@@ -51,6 +51,9 @@ class Position:
     atr_at_entry: Optional[float] = None
     regime_at_entry: Optional[str] = None
     
+    # Time tracking for time stop
+    entry_day_index: int = 0  # Day index at entry (for backtest)
+    
     @property
     def is_long(self) -> bool:
         return self.side == PositionSide.LONG
@@ -72,6 +75,10 @@ class Position:
             return (current_price - self.entry_price) / self.entry_price
         else:
             return (self.entry_price - current_price) / self.entry_price
+    
+    def holding_days(self, current_day_index: int) -> int:
+        """Calculate number of days held."""
+        return current_day_index - self.entry_day_index
 
 
 @dataclass
@@ -124,15 +131,22 @@ class PortfolioManager:
         
         # Initial equity
         self._initial_equity = initial_cash
+        
+        # Hard stop cooldown tracking: symbol -> datetime of last hard stop
+        self.last_hard_stop_dt: Dict[str, datetime] = {}
     
     @property
     def equity(self) -> float:
-        """Calculate current equity (placeholder for mark-to-market)."""
-        # In backtest, this should be called with current prices
-        return self.cash + sum(
-            pos.shares * pos.entry_price * (1 if pos.is_long else -1)
-            for pos in self.positions.values()
-        )
+        """Calculate current equity at entry prices (placeholder for mark-to-market)."""
+        # In backtest, prefer mark_to_market() with current prices
+        position_value = 0.0
+        for pos in self.positions.values():
+            if pos.is_long:
+                position_value += pos.shares * pos.entry_price
+            else:
+                # Short: liability at entry price
+                position_value -= pos.shares * pos.entry_price
+        return self.cash + position_value
     
     def mark_to_market(self, prices: Dict[str, float]) -> float:
         """
@@ -148,10 +162,13 @@ class PortfolioManager:
         for symbol, pos in self.positions.items():
             price = prices.get(symbol, pos.entry_price)
             if pos.is_long:
+                # Long: we own shares worth current price
                 position_value += pos.shares * price
             else:
-                # Short: profit when price falls
-                position_value += pos.shares * (2 * pos.entry_price - price)
+                # Short: we owe shares at current price (liability)
+                # Cash already includes proceeds from short sale,
+                # so we subtract the cost to cover
+                position_value -= pos.shares * price
         
         return self.cash + position_value
     
@@ -243,24 +260,37 @@ class PortfolioManager:
     def calculate_hard_stop(
         self,
         entry_price: float,
-        side: PositionSide
+        side: PositionSide,
+        atr: Optional[float] = None
     ) -> float:
         """
-        Calculate hard stop price.
+        Calculate hard stop price using ATR-aware distance.
+        
+        Stop distance = max(pct_stop, atr_stop)
         
         Args:
             entry_price: Entry price.
             side: Long or short.
+            atr: ATR value for ATR-based stop (optional).
         
         Returns:
             Hard stop price.
         """
-        stop_pct = self._config.hard_stop_pct / 100
+        # Percentage-based stop distance
+        pct_stop_distance = entry_price * self._config.hard_stop_pct
+        
+        # ATR-based stop distance
+        atr_stop_distance = 0.0
+        if atr is not None and atr > 0:
+            atr_stop_distance = atr * self._config.stop_atr_mult
+        
+        # Use the larger of the two
+        stop_distance = max(pct_stop_distance, atr_stop_distance)
         
         if side == PositionSide.LONG:
-            return entry_price * (1 - stop_pct)
+            return entry_price - stop_distance
         else:
-            return entry_price * (1 + stop_pct)
+            return entry_price + stop_distance
     
     def open_position(
         self,
@@ -270,7 +300,8 @@ class PortfolioManager:
         price: float,
         timestamp: datetime,
         atr: Optional[float] = None,
-        regime: Optional[str] = None
+        regime: Optional[str] = None,
+        day_index: int = 0
     ) -> Tuple[bool, str]:
         """
         Open a new position.
@@ -281,8 +312,9 @@ class PortfolioManager:
             shares: Number of shares.
             price: Entry price.
             timestamp: Entry timestamp.
-            atr: ATR at entry.
+            atr: ATR at entry (for ATR-aware stop).
             regime: Market regime at entry.
+            day_index: Current day index (for time stop tracking).
         
         Returns:
             Tuple of (success, message).
@@ -306,16 +338,17 @@ class PortfolioManager:
             # Short: receive cash minus fees (simplified)
             self.cash += trade_value - fee
         
-        # Create position
+        # Create position with ATR-aware stop
         position = Position(
             symbol=symbol,
             side=side,
             shares=shares,
             entry_price=price,
             entry_date=timestamp,
-            hard_stop=self.calculate_hard_stop(price, side),
+            hard_stop=self.calculate_hard_stop(price, side, atr),
             atr_at_entry=atr,
-            regime_at_entry=regime
+            regime_at_entry=regime,
+            entry_day_index=day_index
         )
         
         # Initialize peak/trough for trailing
@@ -395,6 +428,10 @@ class PortfolioManager:
             reason=reason,
             pnl=net_pnl
         ))
+        
+        # Track hard stop for cooldown
+        if reason == "hard_stop":
+            self.last_hard_stop_dt[symbol] = timestamp
         
         # Remove position
         del self.positions[symbol]
@@ -484,6 +521,41 @@ class PortfolioManager:
                 triggers.append(symbol)
             elif pos.is_short and price >= pos.hard_stop:
                 triggers.append(symbol)
+        
+        return triggers
+    
+    def check_time_stops(
+        self,
+        current_day_index: int,
+        prices: Dict[str, float]
+    ) -> List[str]:
+        """
+        Check time-based stops (positions held too long without profit).
+        
+        Args:
+            current_day_index: Current trading day index.
+            prices: Current prices.
+        
+        Returns:
+            List of symbols with triggered time stops.
+        """
+        if not self._config.time_stop_enabled:
+            return []
+        
+        triggers = []
+        max_hold = self._config.max_hold_days
+        
+        for symbol, pos in self.positions.items():
+            hold_days = pos.holding_days(current_day_index)
+            
+            if hold_days >= max_hold:
+                # Only trigger if not profitable
+                price = prices.get(symbol, pos.entry_price)
+                pnl = pos.current_pnl(price)
+                
+                if pnl <= 0:
+                    triggers.append(symbol)
+                    logger.debug(f"Time stop triggered for {symbol}: hold_days={hold_days}, pnl={pnl:.2f}")
         
         return triggers
     

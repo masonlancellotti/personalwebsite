@@ -214,18 +214,23 @@ class RegimeModel:
     def get_regime_with_confidence(
         self,
         df: pd.DataFrame
-    ) -> Tuple[MarketRegime, float, float]:
+    ) -> Tuple[MarketRegime, float, float, float]:
         """
-        Get regime with bull/bear probabilities.
+        Get regime with all probabilities.
         
         Args:
             df: DataFrame with 'close' column.
         
         Returns:
-            Tuple of (regime, bull_prob, bear_prob).
+            Tuple of (regime, bull_prob, bear_prob, side_prob).
+            Note: bull_prob + bear_prob + side_prob ≈ 1.0 (rounding allowed)
         """
         regime, probs = self.predict(df)
-        return regime, probs[MarketRegime.BULL], probs[MarketRegime.BEAR]
+        bull_prob = probs[MarketRegime.BULL]
+        bear_prob = probs[MarketRegime.BEAR]
+        side_prob = probs[MarketRegime.SIDEWAYS]
+        
+        return regime, bull_prob, bear_prob, side_prob
     
     def needs_refit(self) -> bool:
         """
@@ -308,19 +313,14 @@ class RegimeDetector:
         Initialize regime detection (bootstrap training).
         
         Loads cached model or trains fresh on historical SPY data.
+        Always fetches proxy data for regime inference.
         """
         if self._initialized:
             return
         
         logger.info("Initializing regime detector")
         
-        # Try to load cached model
-        if self._model.load_model() and not self._model.needs_refit():
-            logger.info("Using cached HMM model")
-            self._initialized = True
-            return
-        
-        # Fetch historical SPY data
+        # Always fetch proxy data (needed for regime inference)
         logger.info(f"Fetching {self._config.lookback_years} years of {self._config.market_proxy} data")
         provider = get_data_provider()
         self._proxy_data = provider.get_market_proxy_history(
@@ -331,22 +331,32 @@ class RegimeDetector:
         if self._proxy_data.empty or len(self._proxy_data) < 252:
             raise ValueError(f"Insufficient {self._config.market_proxy} data for HMM training")
         
-        # Train model
+        # Try to load cached model
+        if self._model.load_model() and not self._model.needs_refit():
+            logger.info("Using cached HMM model")
+            self._initialized = True
+            return
+        
+        # Train model (no cached model or needs refit)
         self._model.fit(self._proxy_data)
         self._initialized = True
     
     def get_current_regime(
         self,
+        as_of_date: Optional[datetime] = None,
         proxy_data: Optional[pd.DataFrame] = None
-    ) -> Tuple[MarketRegime, float, float]:
+    ) -> Tuple[MarketRegime, float, float, float]:
         """
         Get current market regime.
         
         Args:
+            as_of_date: Date to evaluate regime as of (for backtesting).
+                        Only data BEFORE this date will be used (no lookahead).
             proxy_data: Optional updated proxy data.
         
         Returns:
-            Tuple of (regime, bull_prob, bear_prob).
+            Tuple of (regime, bull_prob, bear_prob, side_prob).
+            Note: bull + bear + side ≈ 1.0 (rounding allowed)
         """
         if not self._initialized:
             self.initialize()
@@ -357,8 +367,32 @@ class RegimeDetector:
         if self._proxy_data is None or self._proxy_data.empty:
             raise ValueError("No proxy data available")
         
-        # Check if refit needed
-        if self._model.needs_refit():
+        # Filter data to avoid lookahead bias
+        if as_of_date is not None:
+            # Ensure timezone-aware comparison
+            if as_of_date.tzinfo is None:
+                from datetime import timezone
+                as_of_date = as_of_date.replace(tzinfo=timezone.utc)
+            
+            # Make sure proxy data timestamps are comparable
+            proxy_ts = pd.to_datetime(self._proxy_data['timestamp'])
+            if proxy_ts.dt.tz is None:
+                proxy_ts = proxy_ts.dt.tz_localize('UTC')
+            
+            # Use only data up to (but not including) as_of_date
+            # This ensures we're using t-1 close for day t decision
+            mask = proxy_ts < as_of_date
+            data_for_regime = self._proxy_data[mask].copy()
+            
+            if data_for_regime.empty or len(data_for_regime) < 50:
+                # Fallback to sideways if insufficient data
+                logger.warning(f"Insufficient data for regime detection as of {as_of_date}")
+                return MarketRegime.SIDEWAYS, 0.33, 0.33, 0.34
+        else:
+            data_for_regime = self._proxy_data
+        
+        # Check if refit needed (only for live trading, not backtest)
+        if as_of_date is None and self._model.needs_refit():
             logger.info("Refitting HMM model (periodic refit)")
             
             if self._config.use_rolling_window:
@@ -370,7 +404,7 @@ class RegimeDetector:
             
             self._model.fit(window_data)
         
-        return self._model.get_regime_with_confidence(self._proxy_data)
+        return self._model.get_regime_with_confidence(data_for_regime)
     
     def update_proxy_data(self, new_data: pd.DataFrame) -> None:
         """
@@ -399,7 +433,7 @@ class RegimeDetector:
             bool: True if long entries allowed.
         """
         if bull_prob is None:
-            regime, bull_prob, _ = self.get_current_regime()
+            regime, bull_prob, _, _ = self.get_current_regime()
         return bull_prob >= self._config.bull_prob_threshold
     
     def can_trade_short(self, bear_prob: Optional[float] = None) -> bool:
@@ -413,7 +447,7 @@ class RegimeDetector:
             bool: True if short entries allowed.
         """
         if bear_prob is None:
-            regime, _, bear_prob = self.get_current_regime()
+            regime, _, bear_prob, _ = self.get_current_regime()
         return bear_prob >= self._config.bear_prob_threshold
 
 
@@ -434,12 +468,12 @@ def get_regime_detector() -> RegimeDetector:
     return _detector
 
 
-def get_current_regime() -> Tuple[MarketRegime, float, float]:
+def get_current_regime() -> Tuple[MarketRegime, float, float, float]:
     """
     Convenience function to get current regime.
     
     Returns:
-        Tuple of (regime, bull_prob, bear_prob).
+        Tuple of (regime, bull_prob, bear_prob, side_prob).
     """
     detector = get_regime_detector()
     detector.initialize()

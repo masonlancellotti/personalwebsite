@@ -196,7 +196,8 @@ class Backtester:
     def _process_exits(
         self,
         date: datetime,
-        prices: Dict[str, float]
+        prices: Dict[str, float],
+        day_index: int = 0
     ) -> None:
         """
         Process exit signals (stops).
@@ -204,6 +205,7 @@ class Backtester:
         Args:
             date: Current date.
             prices: Current prices (close for stop checks).
+            day_index: Current day index (for time stops).
         """
         # 1) Check hard stops
         hard_stop_triggers = self._portfolio.check_hard_stops(prices)
@@ -214,8 +216,19 @@ class Backtester:
             if pos:
                 exit_price = price * (1 - self._fee_rate) if pos.is_long else price * (1 + self._fee_rate)
                 self._portfolio.close_position(symbol, exit_price, date, "hard_stop")
+                # Notify strategy for cooldown tracking
+                self._strategy.set_hard_stop_cooldown(symbol, date)
         
-        # 2) Check trailing stops
+        # 2) Check time stops
+        time_stop_triggers = self._portfolio.check_time_stops(day_index, prices)
+        for symbol in time_stop_triggers:
+            if symbol in self._portfolio.positions:
+                price = prices.get(symbol, 0)
+                pos = self._portfolio.positions[symbol]
+                exit_price = price * (1 - self._fee_rate) if pos.is_long else price * (1 + self._fee_rate)
+                self._portfolio.close_position(symbol, exit_price, date, "time_stop")
+        
+        # 3) Check trailing stops
         trail_triggers = self._portfolio.update_trailing_stops(prices)
         for symbol in trail_triggers:
             if symbol in self._portfolio.positions:
@@ -229,7 +242,8 @@ class Backtester:
         signals: List[TradeSignal],
         date: datetime,
         open_prices: Dict[str, float],
-        close_prices: Dict[str, float]
+        close_prices: Dict[str, float],
+        day_index: int = 0
     ) -> None:
         """
         Process entry signals.
@@ -239,6 +253,7 @@ class Backtester:
             date: Trade date.
             open_prices: Open prices (for fills).
             close_prices: Close prices (for exposure calc).
+            day_index: Current day index (for time stop tracking).
         """
         for signal in signals:
             if not signal.should_trade:
@@ -281,7 +296,8 @@ class Backtester:
                 price=entry_price,
                 timestamp=date,
                 atr=atr,
-                regime=signal.regime.value
+                regime=signal.regime.value,
+                day_index=day_index
             )
             
             if not success:
@@ -362,7 +378,7 @@ class Backtester:
                 continue
             
             # 1) Process exits at close (stops use close prices)
-            self._process_exits(date_dt, close_prices)
+            self._process_exits(date_dt, close_prices, day_index=i)
             
             # 2) Record equity at close
             self._portfolio.record_equity(date_dt, close_prices)
@@ -382,25 +398,31 @@ class Backtester:
                         symbol_data_through_today["SPY"]
                     )
                 
-                # Generate signals
+                # Generate signals (use pre_filter_sentiment=True to avoid RSS spam)
+                # Only fetch sentiment for candidates that pass regime+technical+trend
                 next_date = datetime.combine(trading_dates[i + 1], datetime.min.time())
                 signals = self._strategy.get_actionable_signals(
                     symbol_data_through_today,
-                    next_date
+                    next_date,
+                    pre_filter_sentiment=True
                 )
                 
                 # Get next day's prices for entries
                 next_open = self._get_prices_at_date(next_date, "open")
                 next_close = self._get_prices_at_date(next_date, "close")
                 
-                # 4) Process entries at next open
-                self._process_entries(signals, next_date, next_open, next_close)
+                # 4) Process entries at next open (pass day_index for time stop tracking)
+                self._process_entries(signals, next_date, next_open, next_close, day_index=i + 1)
             
-            # Progress logging
+            # Progress logging every 50 days
             if (i + 1) % 50 == 0:
                 equity = self._portfolio.mark_to_market(close_prices)
-                logger.info(f"Day {i + 1}/{len(trading_dates)}: equity=${equity:,.2f}, "
-                           f"positions={len(self._portfolio.positions)}")
+                cash = self._portfolio.cash
+                pos_count = len(self._portfolio.positions)
+                logger.info(
+                    f"Day {i + 1}/{len(trading_dates)}: "
+                    f"equity=${equity:,.2f}, cash=${cash:,.2f}, positions={pos_count}"
+                )
         
         # Close remaining positions at final close
         final_prices = self._get_prices_at_date(
