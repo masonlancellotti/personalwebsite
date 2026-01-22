@@ -79,7 +79,7 @@
   text-decoration: none;
   border-left: 3px solid transparent;
   transition: all 0.2s;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 500;
 }
 
@@ -215,13 +215,13 @@
 }
 
 .item-location {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #666;
   font-weight: 500;
 }
 
 .item-date {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #666;
   font-style: italic;
 }
@@ -237,7 +237,7 @@
   padding-left: 1.5rem;
   margin-bottom: 0.35rem;
   color: #444;
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1.4;
 }
 
@@ -290,7 +290,7 @@
 .resume-item p {
   margin-bottom: 0.4rem;
   color: #444;
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1.4;
 }
 
@@ -484,7 +484,7 @@
 .right-panel-contact-link {
   color: #444;
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: color 0.2s;
   word-break: break-word;
   overflow-wrap: break-word;
