@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  trading-bot-api:
+    build: .
+    container_name: trading-bot-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ALPACA_API_KEY=${ALPACA_API_KEY}
+      - ALPACA_SECRET_KEY=${ALPACA_SECRET_KEY}
+      - ALPACA_PAPER=${ALPACA_PAPER:-true}
+      - ALPACA_DATA_FEED=${ALPACA_DATA_FEED:-iex}
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    volumes:
+      - trading-data:/app/data
+      - trading-reports:/app/reports
+    restart: unless-stopped
+    command: ["python", "main.py", "api"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Run scheduled backtest/live scans
+  trading-bot-worker:
+    build: .
+    container_name: trading-bot-worker
+    environment:
+      - ALPACA_API_KEY=${ALPACA_API_KEY}
+      - ALPACA_SECRET_KEY=${ALPACA_SECRET_KEY}
+      - ALPACA_PAPER=${ALPACA_PAPER:-true}
+      - ALPACA_DATA_FEED=${ALPACA_DATA_FEED:-iex}
+      - LIVE_SCAN_INTERVAL=60
+    volumes:
+      - trading-data:/app/data
+      - trading-reports:/app/reports
+    restart: unless-stopped
+    command: ["python", "main.py", "live"]
+    profiles:
+      - worker  # Only starts with: docker-compose --profile worker up
+
+volumes:
+  trading-data:
+  trading-reports:
+

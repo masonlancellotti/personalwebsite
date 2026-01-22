@@ -1,8 +1,49 @@
+# Virtual environment
+venv/
 .venv/
+env/
+
+# Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+
+# Environment files (keep secrets local)
 .env
 .env.*
+!.env.example
+
+# Git
 .git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime data (rebuild in container)
+app/data/
+app/reports/
+data/
+reports/
+
+# Old logs/trades (deprecated)
 logs/
 trades/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,7 +1,0 @@
-# Python 3.10-3.13 compatible (Python 3.14 may have issues with pandas-ta/numba)
-alpaca-py>=0.30.0,<0.44.0
-pandas>=2.3.0
-numpy>=2.2.6
-pandas-ta==0.4.71b0
-python-dotenv>=1.0.0,<2.0.0
-pyyaml>=6.0,<7.0
