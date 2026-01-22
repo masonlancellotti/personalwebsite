@@ -403,6 +403,19 @@
   line-height: 1.5;
 }
 
+/* Ensure all right panel body text uses consistent font size */
+.right-panel-card .right-panel-text,
+.right-panel-card .right-panel-list li {
+  font-size: 1.1rem !important;
+  line-height: 1.5;
+}
+
+/* Override any grid-specific styles for regular cards */
+.right-panel-card:not(.right-panel-grid *) .right-panel-text,
+.right-panel-card:not(.right-panel-grid *) .right-panel-list li {
+  font-size: 1.1rem !important;
+}
+
 .right-panel-grid .right-panel-list li {
   padding-left: 1.2rem;
   margin-bottom: 0.5rem;
@@ -534,6 +547,7 @@
   }
   
   .right-panel-text,
+  .right-panel-list li,
   .right-panel-link,
   .right-panel-contact-link {
     font-size: 0.95rem !important;
@@ -604,6 +618,7 @@
   }
   
   .right-panel-text,
+  .right-panel-list li,
   .right-panel-link,
   .right-panel-contact-link {
     font-size: 0.9rem !important;
@@ -674,6 +689,7 @@
   }
   
   .right-panel-text,
+  .right-panel-list li,
   .right-panel-link,
   .right-panel-contact-link {
     font-size: 0.85rem !important;
@@ -744,6 +760,7 @@
   }
   
   .right-panel-text,
+  .right-panel-list li,
   .right-panel-link,
   .right-panel-contact-link {
     font-size: 0.8rem !important;
