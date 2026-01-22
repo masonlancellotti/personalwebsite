@@ -378,7 +378,7 @@
 
 .right-panel-text {
   color: #444;
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1.5;
   margin: 0;
 }
@@ -399,21 +399,21 @@
   padding-left: 1.5rem;
   margin-bottom: 0.75rem;
   color: #444;
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1.5;
 }
 
 /* Ensure all right panel body text uses consistent font size */
 .right-panel-card .right-panel-text,
 .right-panel-card .right-panel-list li {
-  font-size: 1.1rem !important;
+  font-size: 1rem !important;
   line-height: 1.5;
 }
 
 /* Override any grid-specific styles for regular cards */
 .right-panel-card:not(.right-panel-grid *) .right-panel-text,
 .right-panel-card:not(.right-panel-grid *) .right-panel-list li {
-  font-size: 1.1rem !important;
+  font-size: 1rem !important;
 }
 
 .right-panel-grid .right-panel-list li {
