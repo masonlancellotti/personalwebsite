@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Navigation from './components/Navigation'
 import HomePage from './components/HomePage'
 import TradingAlgosPage from './components/TradingAlgos/TradingAlgosPage'
-import SwimmingGallery from './components/SwimmingGallery'
 import './App.css'
 
 function MainContent() {
@@ -16,7 +15,6 @@ function MainContent() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/tradingalgos" element={<TradingAlgosPage />} />
-        <Route path="/swimming-gallery" element={<SwimmingGallery />} />
       </Routes>
     </main>
   )

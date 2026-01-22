@@ -44,11 +44,6 @@ function HomePage() {
                   Emory Economics Review
                 </a>
               </li>
-              <li>
-                <Link to="/swimming-gallery" className="sidebar-internal-link">
-                  Swim Gallery
-                </Link>
-              </li>
             </ul>
           </aside>
           
@@ -58,8 +53,8 @@ function HomePage() {
               <div className="right-panel-contact-container">
                 <div className="right-panel-contact">
                   <span className="right-panel-contact-label">Email:</span>
-                  <a href="mailto:mason.lancellotti@emory.edu" className="right-panel-contact-link">
-                    mason.lancellotti@emory.edu
+                  <a href="mailto:malance@emory.edu" className="right-panel-contact-link">
+                    malance@emory.edu
                   </a>
                 </div>
                 <div className="right-panel-contact">
@@ -107,7 +102,7 @@ function HomePage() {
             <ul className="item-bullets">
               <li>
                 <a href="/documents/Transcript_Mason_Lancellotti.pdf" target="_blank" rel="noopener noreferrer" className="gpa-link">
-                  Cumulative GPA: 3.98 / 4.00
+                  Cumulative GPA: 3.99 / 4.00
                 </a>
               </li>
               <li>Honors: Dean's List (3x)</li>
@@ -215,9 +210,7 @@ function HomePage() {
             <div className="item-header">
               <div>
                 <h3 className="item-title">
-                  <Link to="/swimming-gallery" className="head-captain-link">
-                    Emory Club Swimming
-                  </Link>
+                  Emory Club Swimming
                 </h3>
                 <p className="item-subtitle">Head Captain</p>
               </div>
@@ -244,7 +237,7 @@ function HomePage() {
         <section className="resume-section">
           <h2 className="section-title">ADDITIONAL INFORMATION</h2>
           <div className="resume-item">
-            <p><strong>Skills:</strong> Expert in PowerPoint, data storytelling; Advanced in Excel, Python, Java, AI tools, corporate finance; Proficient in economic modeling, accounting; Intermediate in SQL, Tableau, web scraping; Elementary in Power BI, R</p>
+            <p><strong>Skills:</strong> Expert in Python, Excel, AI tools, PowerPoint; Advanced in Java, statistical modeling, corporate finance; Proficient in SQL, JavaScript, HTML web development, accounting; Intermediate in Tableau, API integration, web scraping; Elementary in Power BI, R</p>
             <p><strong>Languages:</strong> Proficient in Spanish</p>
             <p><strong>Interests:</strong> Weightlifting, investing, pickleball, travel, football, biohacking, singing, medieval history</p>
           </div>
@@ -254,7 +247,7 @@ function HomePage() {
           <div className="right-panel-card">
             <h3 className="right-panel-title">About</h3>
             <p className="right-panel-text">
-              I'm Mason Lancellotti, a junior at Emory University. I'm particularly passionate about investing, finance, and data analytics. During my last semester, I expanded my economic modeling abilities and learned the fundamentals of AI to better automate and optimize my work. This semester, I am focused specifically on computer science and business, in order to bolster my technical skills further and gain a more analytical perspective behind how firms operate and make decisions.
+              I'm Mason Lancellotti, a junior at Emory University. I'm particularly passionate about investing, finance, and data analytics. During my last semester, I expanded my economic modeling abilities and learned the fundamentals of AI to improve work efficiency. This semester, I am focused specifically on computer science and business, in order to bolster my technical skills further and gain a more analytical perspective behind how firms operate and make decisions.
             </p>
           </div>
           
@@ -264,16 +257,16 @@ function HomePage() {
               Seeking Summer 2026 internships in wealth management, consulting, or data analytics. Interested in roles that will allow me to utilize my unique, interdisciplinary background to have a meaningful impact on the business, clients, or the world.
             </p>
             <ul className="right-panel-list">
-              <li>Preferred Locations: DMV; NYC; Atlanta</li>
+              <li>Preferred Locations: DMV, Atlanta, NYC</li>
             </ul>
           </div>
           
           <div className="right-panel-card">
             <h3 className="right-panel-title">What I'm Working On</h3>
             <ul className="right-panel-list">
-              <li>Observing the current trading algorithms' performance and changing them accordingly</li>
-              <li>Building a third trading program for stock options using the Black-Scholes model</li>
               <li>Website bug fixes/improvements and adding mobile compatibility</li>
+              <li>Building a third trading program for stock options using the Black-Scholes model</li>
+              <li>Observing the current trading algorithms' performance and changing them accordingly</li>
             </ul>
           </div>
         </aside>
